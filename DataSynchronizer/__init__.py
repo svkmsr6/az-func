@@ -3,12 +3,11 @@ import yaml
 import datetime
 import logging
 import requests
-#import json
+import json
 import csv
-from pathlib import Path
-
+#from pathlib import Path
 import azure.functions as func
-from azure.storage.blob import ContainerClient
+from azure.storage.blob import ContainerClient, BlobServiceClient
 #from azure.identity import DefaultAzureCredential
 
 dir_root = os.path.dirname(os.path.abspath(__file__))
@@ -30,7 +29,7 @@ def get_files(dir):
                 yield entry
 
 def fetch_n_store_data():
-    sitecoreData = []
+    parsed_data = []
     # while number <= 11:
     try:
     # api_url = f"https://cdt.maersk.com/api_sc9/faqs?limit=30&page={number}&orderby=priority,name"
@@ -50,7 +49,7 @@ def fetch_n_store_data():
             #     sitecoreData.append(list_items)
 
             for item in data['results']:
-                sitecoreData.append({
+                parsed_data.append({
                     'name': f"{item['name']['title']}. {item['name']['first']} {item['name']['last']}",
                     'country': item['location']['country'],
                     'gender': item['gender'],
@@ -60,19 +59,21 @@ def fetch_n_store_data():
     except Exception as e:
         print(e)
 
-    ##### CSV Parsing - START #########
-    path = parent_root + "/tmp/data.csv"
-    data_file = open(path, 'wb')
-    csv_writer = csv.writer(data_file)
+    return parsed_data
 
-    count = 0
-    for emp in sitecoreData:
-        if count == 0:
-            # Writing headers of CSV file
-            header = emp.keys()
-            csv_writer.writerow(header)
-            count += 1
-        csv_writer.writerow(emp.values())
+    ##### CSV Parsing - START #########
+    # path = parent_root + "/tmp/data.csv"
+    # data_file = open(path, 'wb')
+    # csv_writer = csv.writer(data_file)
+
+    # count = 0
+    # for emp in sitecoreData:
+    #     if count == 0:
+    #         # Writing headers of CSV file
+    #         header = emp.keys()
+    #         csv_writer.writerow(header)
+    #         count += 1
+    #     csv_writer.writerow(emp.values())
     ##### CSV Parsing - END #########
 
 def upload(files, connection_string, container_name, timestamp=0):
@@ -85,6 +86,17 @@ def upload(files, connection_string, container_name, timestamp=0):
             blob_client.upload_blob(data)
             os.remove(file)
 
+def upload_json_to_ABS(data, connection_string, container_name, timestamp=0):
+    json_body = json.dumps(data)
+
+    blob_service_client  = BlobServiceClient.from_connection_string(connection_string)
+    blob_client = blob_service_client.get_blob_client(container_name,blob=f"data.json")
+
+
+    blob_client.upload_blob(json_body)
+    
+    logging.info('File loaded to Azure Successfully...')
+
 def main(mytimer: func.TimerRequest) -> None:
     
     #Get Timestamp
@@ -93,13 +105,11 @@ def main(mytimer: func.TimerRequest) -> None:
     #Get Config
     config = load_config()
 
-    #fetch the json data and store
-    fetch_n_store_data()
+    #fetch the json data
+    data = fetch_n_store_data()
     
     #upload to ABS
-    upload(get_files(parent_root + "/tmp"), config['azure_storage_conn_str'], config['container_name'], utc_timestamp)
-
-    logging.info('File loaded to Azure Successfully...')
+    upload_json_to_ABS(data, config['azure_storage_conn_str'], config['container_name'], utc_timestamp)
 
     if mytimer.past_due:
         logging.info('The timer is past due!')
