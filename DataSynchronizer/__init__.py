@@ -61,8 +61,8 @@ def fetch_n_store_data():
         print(e)
 
     ##### CSV Parsing - START #########
-    path = parent_root + "/tmp/users.csv"
-    data_file = open(path, 'w', newline='')
+    path = parent_root + "/tmp/data.csv"
+    data_file = open(path, 'wb')
     csv_writer = csv.writer(data_file)
 
     count = 0
