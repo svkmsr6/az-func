@@ -92,7 +92,7 @@ def upload_json_to_ABS(data, connection_string, container_name, timestamp=0):
     blob_service_client  = BlobServiceClient.from_connection_string(connection_string)
     blob_client = blob_service_client.get_blob_client(container_name,blob=f"data.json")
 
-
+    blob_client.delete_blob()
     blob_client.upload_blob(json_body)
     
     logging.info('File loaded to Azure Successfully...')
