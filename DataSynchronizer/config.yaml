@@ -1,4 +1,3 @@
 ---
 azure_storage_conn_str: "DefaultEndpointsProtocol=https;AccountName=azsvkstore;AccountKey=yVi1Bj/Fd2nH8WbqbyU5ME2TB0akiHpp/0gel0cECmxbLKNUyINj1wCyE/lQQO6sn023UojI3wow+XUK/GRddw==;EndpointSuffix=core.windows.net"
 container_name: "az-data"
-source_folder: "/Users/souvikmisra/Desktop/azure/az-func"
