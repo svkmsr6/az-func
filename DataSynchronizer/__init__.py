@@ -4,7 +4,7 @@ import datetime
 import logging
 import requests
 import json
-import csv
+#import csv
 #from pathlib import Path
 import azure.functions as func
 from azure.storage.blob import ContainerClient, BlobServiceClient
