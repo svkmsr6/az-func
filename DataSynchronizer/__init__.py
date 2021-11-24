@@ -77,15 +77,13 @@ def restart_app(config):
         subscriptionId='e6e15f30-6109-4156-acf6-34e1188f268e',
         resourceGroupName='az-svk-rg',
         name='sample-nlp')
+    token = config['token']
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': token
+    }
     try:
-        requests.post(
-            url,
-            headers={
-                'Accept': 'application/json',
-                'Authorization': config['token']
-            },
-            data={}
-        )   
+        requests.request("POST", url, headers=headers, data={})  
     except Exception as e:
         logging.error('Restart URL firing failed miserably :D')
         logging.error(e)
