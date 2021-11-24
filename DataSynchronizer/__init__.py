@@ -70,6 +70,8 @@ def upload_json_to_ABS(data, connection_string, container_name, timestamp=0):
     
     logging.info('File loaded to Azure Successfully...')
 
+#def get_AAD_token
+
 def restart_app(config):
     url = config['restart_url'].format(
         subscriptionId='e6e15f30-6109-4156-acf6-34e1188f268e',
@@ -78,7 +80,10 @@ def restart_app(config):
     try:
         requests.post(
             url,
-            headers={'Accept': 'application/json'},
+            headers={
+                'Accept': 'application/json',
+                'Authorization': config['token']
+            },
             data={}
         )   
     except Exception as e:
