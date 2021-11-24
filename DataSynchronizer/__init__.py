@@ -82,7 +82,10 @@ def restart_app(config):
             data={}
         )   
     except Exception as e:
+        logging.error('Restart URL firing failed miserably :D')
         logging.error(e)
+    else:
+        logging.info('Restart URL fired successfully...')
 
 def main(mytimer: func.TimerRequest) -> None:
     
