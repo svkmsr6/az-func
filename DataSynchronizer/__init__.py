@@ -70,14 +70,32 @@ def upload_json_to_ABS(data, connection_string, container_name, timestamp=0):
     
     logging.info('File loaded to Azure Successfully...')
 
-#def get_AAD_token
+def get_AAD_token(config):
+    url = config['auth_url'].format(tenantID=config['tenant_id'])
+    resource_url = config['resource_url']
+    client_id = config['client_id']
+    client_secret = config['client_secret']
+    payload = f'resource={resource_url}&client_id={client_id}&client_secret={client_secret}&grant_type=client_credentials'
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    try:
+        resp = requests.request("POST", url, headers=headers, data=payload)  
+        data = resp.json()
+    except Exception as e:
+        logging.error('Fetching of Auth Token failed miserably :(')
+        logging.error(e)
+        return None
+    else:
+        logging.info('Access Token fetched successfully...')
+        return f'{data["token_type"]} {data["access_token"]}'
 
 def restart_app(config):
     url = config['restart_url'].format(
         subscriptionId='e6e15f30-6109-4156-acf6-34e1188f268e',
         resourceGroupName='az-svk-rg',
         name='sample-nlp')
-    token = config['token']
+    token = get_AAD_token(config)
     headers = {
         'Accept': 'application/json',
         'Authorization': token
